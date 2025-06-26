@@ -1,4 +1,5 @@
 const Faculty = require('../models/faculty.model');
+const Student = require('../models/student.model');
 
 //Profile of logged in faculty
 const getFacultyProfile = async (req, res) => {
@@ -53,9 +54,36 @@ const changeFacultyPassword = async (req, res) => {
     }
 }
 
+//get students from his section
+const getStudentsFromSection = async (req, res) => {
+    try {
+        const facultyId = req.user.id; 
+        const faculty = await Faculty.findByPk(facultyId, {
+            attributes: ['section']
+        });
+
+        if (!faculty) {
+            return res.status(404).json({ message: 'Faculty not found' });
+        }
+
+        const students = await Student.findAll({
+            where: { section: faculty.section },
+            attributes: ['id', 'name', 'email', 'section']
+        });
+
+        res.status(200).json({
+            message: 'Students from section retrieved successfully',
+            students
+        });
+    } catch (error) {
+        console.error('Error retrieving students from section:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
 
 
 module.exports = {
     getFacultyProfile,
-    changeFacultyPassword
+    changeFacultyPassword,
+    getStudentsFromSection
 };

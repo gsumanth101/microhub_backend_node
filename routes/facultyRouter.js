@@ -6,6 +6,7 @@ const router = express.Router();
 
 router.post('/login', logins.facultyLogin);
 router.get('/profile',auth.authenticate, faculty.getFacultyProfile );
+router.get('/students', auth.authenticate, faculty.getStudentsFromSection);
 router.put('/change-password', auth.authenticate, faculty.changeFacultyPassword);
 
 module.exports = router;

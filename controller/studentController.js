@@ -1,9 +1,10 @@
 const Student = require('../models/student.model');
+const Faculty = require('../models/faculty.model');
 
 //Profile of logged in student
 const getStudentProfile = async (req, res) => {
     try {
-        const studentId = req.user.id; // Assuming user ID is stored in req.user
+        const studentId = req.user.id; 
         const student = await Student.findByPk(studentId, {
             attributes: ['id', 'username', 'name', 'email', 'section', 'dept']
         });
@@ -12,9 +13,17 @@ const getStudentProfile = async (req, res) => {
             return res.status(404).json({ message: 'Student not found' });
         }
 
+        const facultyAdvisor = await Faculty.findOne({
+            where: { section: student.section },
+            attributes: ['name']
+        });
+
         res.status(200).json({
             message: 'Student profile retrieved successfully',
-            student
+            student: {
+                ...student.toJSON(),
+                faName: facultyAdvisor ? facultyAdvisor.name : null
+            }
         });
     } catch (error) {
         console.error('Error retrieving student profile:', error);

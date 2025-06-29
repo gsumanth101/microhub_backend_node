@@ -41,5 +41,13 @@ router.put('/update-admin/:id', auth.authenticate, admin.updateAdminDetails);
 router.post('/upload-student', auth.authenticate, upload.single('file'), admin.uploadStudentData);
 router.post('/upload-faculty', auth.authenticate, upload.single('file'), admin.uploadFacultyData);
 
+router.get('/student/:id', auth.authenticate, admin.viewStudent);
+router.get('/faculty/:id', auth.authenticate, admin.viewFaculty);
+router.get('/admin/:id', auth.authenticate, admin.viewAdmin);
+
+router.delete('/delete-faculty/:id', auth.authenticate, admin.deleteFaculty);
+router.delete('/delete-student/:id', auth.authenticate, admin.deleteStudent);
+router.delete('/delete-admin/:id', auth.authenticate, admin.deleteAdmin);
+
 
 module.exports = router;

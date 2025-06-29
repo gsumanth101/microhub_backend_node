@@ -8,4 +8,6 @@ router.post('/login', logins.studentLogin);
 router.get('/profile',auth.authenticate,student.getStudentProfile);
 router.put('/change-password', auth.authenticate, student.changeStudentPassword);
 
+
+
 module.exports = router;

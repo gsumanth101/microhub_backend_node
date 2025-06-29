@@ -146,11 +146,21 @@ const getAdminDetails = async (req, res) => {
     }
 }
 
-//change password of admin
+//change Password logged-in admin
 const changeAdminPassword = async (req, res) => {
     const { oldPassword, newPassword } = req.body;
 
     try {
+        // Input validation
+        if (!oldPassword || !newPassword) {
+            return res.status(400).json({ message: 'Old password and new password are required' });
+        }
+
+        // Password strength validation (optional)
+        if (newPassword.length < 8) {
+            return res.status(400).json({ message: 'New password must be at least 8 characters long' });
+        }
+
         if (!req.user || !req.user.id || req.user.role !== 'admin') {
             return res.status(401).json({ message: 'Unauthorized: Admin not authenticated' });
         }
@@ -167,6 +177,12 @@ const changeAdminPassword = async (req, res) => {
             return res.status(401).json({ message: 'Invalid old password' });
         }
 
+        // Check if new password is different from old password
+        const isSamePassword = await bcrypt.compare(newPassword, admin.password);
+        if (isSamePassword) {
+            return res.status(400).json({ message: 'New password must be different from current password' });
+        }
+
         const hashedNewPassword = await bcrypt.hash(newPassword, 10);
         admin.password = hashedNewPassword;
         await admin.save();
@@ -177,7 +193,10 @@ const changeAdminPassword = async (req, res) => {
         console.error('Error changing admin password:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
-}
+};
+
+
+
 
 //get All Admins
 const getAllAdmins = async (req, res) => {
@@ -683,6 +702,81 @@ const uploadFacultyData = async (req, res) => {
     }
 }
 
+// Delete faculty
+const deleteFaculty = async (req, res) => {
+    try {
+        if (!req.user || !req.user.id || req.user.role !== 'admin') {
+            return res.status(401).json({ message: 'Unauthorized: Admin not authenticated' });
+        }
+
+        const facultyId = req.params.id;
+        const faculty = await Faculty.findByPk(facultyId);
+
+        if (!faculty) {
+            return res.status(404).json({ message: 'Faculty not found' });
+        }
+
+        await faculty.destroy();
+
+        res.status(200).json({ message: 'Faculty deleted successfully' });
+
+    } catch (error) {
+        console.error('Error deleting faculty:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+
+// Delete student
+const deleteStudent = async (req, res) => {
+    try {
+        if (!req.user || !req.user.id || req.user.role !== 'admin') {
+            return res.status(401).json({ message: 'Unauthorized: Admin not authenticated' });
+        }
+
+        const studentId = req.params.id;
+        const student = await Student.findByPk(studentId);
+
+        if (!student) {
+            return res.status(404).json({ message: 'Student not found' });
+        }
+
+        await student.destroy();
+
+        res.status(200).json({ message: 'Student deleted successfully' });
+
+    } catch (error) {
+        console.error('Error deleting student:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+
+// delete admin
+const deleteAdmin = async (req, res) => {
+    try {
+        if (!req.user || !req.user.id || req.user.role !== 'admin') {
+            return res.status(401).json({ message: 'Unauthorized: Admin not authenticated' });
+        }
+
+        const adminId = req.params.id;
+        const admin = await Admin.findByPk(adminId);
+
+        if (!admin) {
+            return res.status(404).json({ message: 'Admin not found' });
+        }
+
+        await admin.destroy();
+
+        res.status(200).json({ message: 'Admin deleted successfully' });
+
+    } catch (error) {
+        console.error('Error deleting admin:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+
+
+
+
 
 module.exports = {
     createAdmin,
@@ -700,5 +794,8 @@ module.exports = {
     viewFaculty,
     viewStudent,
     uploadStudentData,
-    uploadFacultyData
+    uploadFacultyData,
+    deleteFaculty,
+    deleteStudent,
+    deleteAdmin
 };
